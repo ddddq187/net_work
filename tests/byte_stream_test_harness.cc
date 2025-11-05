@@ -48,8 +48,7 @@ ByteStreamAction::~ByteStreamAction() {}
 ByteStreamTestHarness::ByteStreamTestHarness(const std::string &test_name, const size_t capacity)
     : _test_name(test_name), _byte_stream(capacity) {
     std::ostringstream ss;
-    ss << "Initialized with ("
-       << "capacity=" << capacity << ")";
+    ss << "Initialized with (" << "capacity=" << capacity << ")";
     _steps_executed.emplace_back(ss.str());
 }
 
@@ -179,6 +178,6 @@ void Peek::execute(ByteStream &bs) const {
     auto output = bs.peek_output(_output.size());
     if (output != _output) {
         throw ByteStreamExpectationViolation("Expected \"" + _output + "\" at the front of the stream, but found \"" +
-                                             output + "\"");
+                                             string(output) + "\"");
     }
 }

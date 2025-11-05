@@ -1,7 +1,9 @@
 #ifndef SPONGE_LIBSPONGE_BYTE_STREAM_HH
 #define SPONGE_LIBSPONGE_BYTE_STREAM_HH
 
+#include <cstddef>
 #include <string>
+#include <string_view>
 
 //! \brief An in-order byte stream.
 
@@ -11,17 +13,23 @@
 class ByteStream {
   private:
     // Your code here -- add private members as necessary.
-
-    // Hint: This doesn't need to be a sophisticated data structure at
-    // all, but if any of your tests are taking longer than a second,
-    // that's a sign that you probably want to keep exploring
-    // different approaches.
-
-    bool _error{};  //!< Flag indicating that the stream suffered an error.
+    std::string _buffer;       // 连续内存缓冲区
+    size_t _start{};           // 逻辑起始位置
+    size_t _size{};            // 有效数据长度
+    const size_t _capacity{};  // 最大容量
+    // const这里只是声明，必须在构造函数的初始化列表中显示初始化
+    size_t _bytes_written{};  // 总写入字节数
+    size_t _bytes_read{};     // 总弹出字节数
+    bool _input_ended{};        // 输入是否结束
+    bool _error{};            //!< Flag indicating that the stream suffered an error.
+                              // Hint: This doesn't need to be a sophisticated data structure at
+                              // all, but if any of your tests are taking longer than a second,
+                              // that's a sign that you probably want to keep exploring
+                              // different approaches.
 
   public:
     //! Construct a stream with room for `capacity` bytes.
-    ByteStream(const size_t capacity);
+    ByteStream(size_t capacity);
 
     //! \name "Input" interface for the writer
     //!@{
@@ -29,10 +37,10 @@ class ByteStream {
     //! Write a string of bytes into the stream. Write as many
     //! as will fit, and return how many were written.
     //! \returns the number of bytes accepted into the stream
-    size_t write(const std::string &data);
+    size_t write(std::string_view data);
 
     //! \returns the number of additional bytes that the stream has space for
-    size_t remaining_capacity() const;
+    [[nodiscard]] size_t remaining_capacity() const;
 
     //! Signal that the byte stream has reached its ending
     void end_input();
@@ -46,39 +54,39 @@ class ByteStream {
 
     //! Peek at next "len" bytes of the stream
     //! \returns a string
-    std::string peek_output(const size_t len) const;
+    [[nodiscard]] std::string_view peek_output( size_t len) const;
 
     //! Remove bytes from the buffer
-    void pop_output(const size_t len);
+    void pop_output( size_t len);
 
     //! Read (i.e., copy and then pop) the next "len" bytes of the stream
     //! \returns a string
-    std::string read(const size_t len);
+    std::string read( size_t len);
 
     //! \returns `true` if the stream input has ended
-    bool input_ended() const;
+    [[nodiscard]] bool input_ended() const;
 
     //! \returns `true` if the stream has suffered an error
-    bool error() const { return _error; }
+    [[nodiscard]] bool error() const { return _error; }
 
     //! \returns the maximum amount that can currently be read from the stream
-    size_t buffer_size() const;
+    [[nodiscard]] size_t buffer_size() const;
 
     //! \returns `true` if the buffer is empty
-    bool buffer_empty() const;
+    [[nodiscard]] bool buffer_empty() const;
 
     //! \returns `true` if the output has reached the ending
-    bool eof() const;
+    [[nodiscard]] bool eof() const;
     //!@}
 
     //! \name General accounting
     //!@{
 
     //! Total number of bytes written
-    size_t bytes_written() const;
+    [[nodiscard]] size_t bytes_written() const;
 
     //! Total number of bytes popped
-    size_t bytes_read() const;
+    [[nodiscard]] size_t bytes_read() const;
     //!@}
 };
 

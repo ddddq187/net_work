@@ -1,26 +1,30 @@
 ---
-Language: Cpp
-BasedOnStyle: LLVM
-AllowAllParametersOfDeclarationOnNextLine: false
-AlwaysBreakTemplateDeclarations: true
-BinPackArguments: false
-BinPackParameters: false
-BreakConstructorInitializers: BeforeComma
-ColumnLimit: 120
-CommentPragmas: '^(!|NOLINT)'
-ConstructorInitializerAllOnOneLineOrOnePerLine: true
-IncludeBlocks: Regroup
-IncludeCategories: 
-  - Regex: '^<.*'
-    Priority: 2
-  - Regex: '.*'
-    Priority: 1
-IncludeIsMainRegex: '(_dt|_win)?$'
-IndentCaseLabels: true
-IndentWidth: 4
-KeepEmptyLinesAtTheStartOfBlocks: false
-PenaltyReturnTypeOnItsOwnLine: 200
-SpacesBeforeTrailingComments: 2
-TabWidth: 4
-UseTab: Never
-...
+Language: Cpp  # 指定格式化的语言为 C++（clang-format 支持多语言，需明确指定）
+BasedOnStyle: LLVM  # 基础风格继承自 LLVM 风格（LLVM 是 Clang/LLVM 项目的默认代码风格）
+AllowAllParametersOfDeclarationOnNextLine: false  # 禁止函数声明的所有参数整体换行（即参数要么部分换行，要么不换行）
+AlwaysBreakTemplateDeclarations: true  # 模板声明（如 template <typename T>）强制换行（避免模板参数过长导致一行拥挤）
+BinPackArguments: false  # 函数调用的参数不“打包”（即每个参数单独一行，而非尽量挤在同一行）
+BinPackParameters: false  # 函数声明/定义的参数不“打包”（每个参数单独一行，提升可读性）
+BreakConstructorInitializers: BeforeComma  # 构造函数初始化列表在逗号前换行（如：A() : a(1), b(2) → 改为 a(1) ,b(2) 换行）
+ColumnLimit: 120  # 代码行宽限制为 120 个字符（超过则自动换行，默认 LLVM 为 80，此处放宽以减少不必要换行）
+CommentPragmas: '^(!|NOLINT)'  # 匹配特殊注释（如 //! 或 // NOLINT），这些注释不参与格式化（避免破坏注释结构）
+ConstructorInitializerAllOnOneLineOrOnePerLine: true  # 构造函数初始化列表要么全部在一行，要么每个成员单独一行（禁止混合换行）
+IncludeBlocks: Regroup  # 头文件包含按“类别重组”（如系统头文件、本地头文件分开分组排列）
+IncludeCategories:  # 定义头文件包含的分类规则（按优先级排序，优先级高的先排列）
+  - Regex: '^<.*'  # 匹配系统头文件（如 <iostream>、<vector>）
+    Priority: 2  # 优先级 2（数值越小优先级越高？不，clang-format 中 Priority 越大越靠后，此处系统头文件后于本地头文件）
+  - Regex: '.*'  # 匹配所有其他头文件（主要是本地头文件，如 "myheader.h"）
+    Priority: 1  # 优先级 1（本地头文件先于系统头文件排列）
+IncludeIsMainRegex: '(_dt|_win)?$'  # 匹配“主头文件”（如头文件名为 xxx_dt.h 或 xxx_win.h 时，视为与源文件匹配的主头文件，调整包含顺序）
+IndentCaseLabels: true  # switch 的 case 标签缩进（如 case 0: 会缩进，而非与 switch 对齐）
+IndentWidth: 4  # 缩进宽度为 4 个空格（LLVM 默认 2 空格，此处改为更常见的 4 空格风格）
+KeepEmptyLinesAtTheStartOfBlocks: false  # 代码块（如 {} 内）开头不保留空行（避免冗余空行）
+PenaltyReturnTypeOnItsOwnLine: 200  # 函数返回值单独一行的“惩罚分”（数值越大，clang-format 越倾向于让返回值与函数名在同一行，减少换行）
+SpacesBeforeTrailingComments: 2  # 行尾注释前保留 2 个空格（如 int a;  // 变量 a，确保注释与代码间距一致）
+TabWidth: 4  # Tab 键宽度为 4 个空格（但因 UseTab: Never，实际不使用 Tab）
+UseTab: Never  # 禁止使用 Tab 键缩进，全程用空格（避免不同编辑器 Tab 解析差异）
+...  # YAML 文档结束标记
+#- 类 / 结构体名：UpperCamelCase（如 MyClass）
+# - 函数名：lowerCamelCase（如 myFunction）
+# - 常量：kUpperCamelCase（如 kMaxValue）
+# - 全局变量：允许 gUpperCamelCase（如 gGlobalVar）

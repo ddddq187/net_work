@@ -1,24 +1,31 @@
+#include "address.hh"
 #include "socket.hh"
-#include "util.hh"
 
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
 void get_URL(const string &host, const string &path) {
-    // Your code here.
+    // 连接到指定主机的 HTTP 服务，发送请求，并读取到 EOF 为止的全部响应。
 
-    // You will need to connect to the "http" service on
-    // the computer whose name is in the "host" string,
-    // then request the URL path given in the "path" string.
+    TCPSocket tcp_sock{};                     // 创建一个 TCP 套接字
+    tcp_sock.connect(Address(host, "http"));  // 解析主机 + "http"(80端口)，并建立 TCP 连接
 
-    // Then you'll need to print out everything the server sends back,
-    // (not just one call to read() -- everything) until you reach
-    // the "eof" (end of file).
+    string request = "GET " + path + " HTTP/1.1\r\n";  // 请求行：方法、路径、协议版本，以 CRLF 结尾
+    request += "Host: " + host + "\r\n";               // 必需的 Host 头（HTTP/1.1 规范要求）
+    request += "Connection: close\r\n\r\n";            // 告诉服务端响应后关闭连接；空行分隔头与体
+    tcp_sock.write(request);                           // 发送完整的 HTTP 请求报文
 
-    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
-    cerr << "Warning: get_URL() has not been implemented yet.\n";
+    tcp_sock.shutdown(SHUT_WR);  // 半关闭写方向，表示不再发送数据
+
+    while (!tcp_sock.eof()) {     // 循环读取直到对端关闭（到达 EOF）
+        cout << tcp_sock.read();  // 追加打印每次读取到的字节序列
+    }
+
+    tcp_sock.close();  // 关闭套接字并释放资源
 }
 
 int main(int argc, char *argv[]) {

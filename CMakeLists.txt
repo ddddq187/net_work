@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.5)
+cmake_minimum_required (VERSION 3.20)
 cmake_policy (SET CMP0054 NEW)
 project (Sponge)
 
@@ -23,5 +23,7 @@ add_subdirectory ("${PROJECT_SOURCE_DIR}/apps")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/tests")
 
 add_subdirectory ("${PROJECT_SOURCE_DIR}/doctests")
+
+add_subdirectory ("${PROJECT_SOURCE_DIR}/test_read")
 
 include (etc/tests.cmake)
