@@ -3,7 +3,10 @@
 
 #include "byte_stream.hh"
 
+#include <cstddef>
 #include <cstdint>
+#include <map>
+#include <optional>
 #include <string>
 
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
@@ -13,7 +16,12 @@ class StreamReassembler {
     // Your code here -- add private members as necessary.
 
     ByteStream _output;  //!< The reassembled in-order byte stream
-    size_t _capacity;    //!< The maximum number of bytes
+    uint64_t _capacity;  //!< The maximum number of bytes
+    uint64_t _next_index;  //!< next index we want
+    // bool _is_eof;//判断是否到结尾
+    // size_t _eof_index;//eof绝对位置：最后一个字节的index+1
+    std::optional<uint64_t> _eof_index;  // 如果收到 EOF，存储 EOF 位置
+    std::map<uint64_t, std::string> _unassembled_segments;
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
