@@ -9,7 +9,8 @@
 
 using namespace std;
 
-StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity), _capacity(capacity), _next_index(0) {}
+StreamReassembler::StreamReassembler(const size_t capacity)
+    : _output(capacity), _capacity(capacity), _next_index(0), _eof_index(nullopt), _unassembled_segments() {}
 
 void StreamReassembler::push_substring(const string &data,  // NOLINT(readability-function-cognitive-complexity)
                                        const size_t index,
