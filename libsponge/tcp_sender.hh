@@ -6,7 +6,6 @@
 #include "tcp_segment.hh"
 #include "wrapping_integers.hh"
 
-#include <functional>
 #include <queue>
 
 //! \brief The "sender" part of a TCP implementation.
@@ -21,7 +20,7 @@ class TCPSender {
     WrappingInt32 _isn;
 
     //! outbound queue of segments that the TCPSender wants sent
-    std::queue<TCPSegment> _segments_out{};
+    std::queue<TCPSegment> _segments_out;
 
     //! retransmission timer for the connection
     unsigned int _initial_retransmission_timeout;
@@ -32,11 +31,50 @@ class TCPSender {
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
 
+    //! number of bytes currently "in flight" (sent but not yet acknowledged)
+    uint64_t _bytes_in_flight{0};
+
+    //! segments that have been sent but not yet fully acknowledged
+    std::queue<TCPSegment> _outstanding_segments;
+
+    //! current retransmission timeout (RTO) value in milliseconds (base value)
+    unsigned int _retransmission_timeout;
+
+    //! how many times the retransmission timer has backed off (used to compute current RTO)
+    unsigned int _timer_backoff_exp{0};
+
+    //! time, in milliseconds, since the retransmission timer was (re)started
+    uint64_t _time_since_last_tick{0};
+
+    //! whether the retransmission timer is currently running
+    bool _timer_running{false};
+
+    //! number of consecutive retransmissions of the same segment
+    unsigned int _consecutive_retransmissions_cnt{0};
+
+    //! latest cumulative acknowledgment number (absolute seqno of first unsent byte)
+    uint64_t _last_ackno{0};
+
+    //! most recently advertised receiver window size
+    uint16_t _receiver_window_size{0};
+
+    //! whether we've ever received an ACK (used to distinguish SYN phase from zero-window probing)
+    bool _has_seen_ack{false};
+
+    //! whether we have sent the SYN flag yet
+    bool _syn_sent{false};
+
+    //! whether we have sent the FIN flag yet
+    bool _fin_sent{false};
+
+    //! helper: send a segment, track it as outstanding, and start timer if needed
+    void send_and_track(const TCPSegment &seg);
+
   public:
     //! Initialize a TCPSender
-    TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
-              const uint16_t retx_timeout = TCPConfig::TIMEOUT_DFLT,
-              const std::optional<WrappingInt32> fixed_isn = {});
+    TCPSender(size_t capacity = TCPConfig::DEFAULT_CAPACITY,
+              uint16_t retx_timeout = TCPConfig::TIMEOUT_DFLT,
+              std::optional<WrappingInt32> fixed_isn = {});
 
     //! \name "Input" interface for the writer
     //!@{
@@ -48,7 +86,7 @@ class TCPSender {
     //!@{
 
     //! \brief A new acknowledgment was received
-    void ack_received(const WrappingInt32 ackno, const uint16_t window_size);
+    void ack_received(WrappingInt32 ackno, uint16_t window_size);
 
     //! \brief Generate an empty-payload segment (useful for creating empty ACK segments)
     void send_empty_segment();
@@ -57,7 +95,7 @@ class TCPSender {
     void fill_window();
 
     //! \brief Notifies the TCPSender of the passage of time
-    void tick(const size_t ms_since_last_tick);
+    void tick(size_t ms_since_last_tick);
     //!@}
 
     //! \name Accessors
