@@ -1,5 +1,5 @@
 #include "address.hh"
-#include "socket.hh"
+#include "tcp_sponge_socket.hh"
 
 #include <cstdio>
 #include <cstdlib>
@@ -11,7 +11,7 @@ using namespace std;
 void get_URL(const string &host, const string &path) {
     // 连接到指定主机的 HTTP 服务，发送请求，并读取到 EOF 为止的全部响应。
 
-    TCPSocket tcp_sock{};                     // 创建一个 TCP 套接字
+    CS144TCPSocket tcp_sock{};                     // 创建一个 TCP 套接字
     tcp_sock.connect(Address(host, "http"));  // 解析主机 + "http"(80端口)，并建立 TCP 连接
 
     string request = "GET " + path + " HTTP/1.1\r\n";  // 请求行：方法、路径、协议版本，以 CRLF 结尾
@@ -25,7 +25,7 @@ void get_URL(const string &host, const string &path) {
         cout << tcp_sock.read();  // 追加打印每次读取到的字节序列
     }
 
-    tcp_sock.close();  // 关闭套接字并释放资源
+    tcp_sock.wait_until_closed();  // 等待 TCP 连接完全关闭
 }
 
 int main(int argc, char *argv[]) {

@@ -21,6 +21,15 @@ class TCPConnection {
     //! in case the remote TCPConnection doesn't know we've received its whole stream?
     bool _linger_after_streams_finish{true};
 
+    //! time since last segment was received (in milliseconds)
+    size_t _time_since_last_segment_received{0};
+
+    //! whether the connection has been reset (received RST)
+    bool _is_reset{false};
+
+    //! helper: send a segment with receiver's ackno and window size filled in
+    void send_segment(TCPSegment &seg);
+
   public:
     //! \name "Input" interface for the writer
     //!@{

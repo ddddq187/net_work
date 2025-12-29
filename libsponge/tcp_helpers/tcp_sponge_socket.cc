@@ -128,7 +128,7 @@ void TCPSpongeSocket<AdaptT>::_initialize_TCP(const TCPConfig &config) {
             // the pipe, handling the possibility of a partial
             // write (i.e., only pop what was actually written).
             const size_t amount_to_write = min(size_t(65536), inbound.buffer_size());
-            const std::string buffer = inbound.peek_output(amount_to_write);
+            const std::string buffer = std::string(inbound.peek_output(amount_to_write));
             const auto bytes_written = _thread_data.write(move(buffer), false);
             inbound.pop_output(bytes_written);
 
